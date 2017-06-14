@@ -1,18 +1,18 @@
-class PVector
+class myPVector
 {
     float x,y;
-    PVector(float xx,float yy)
+    myPVector(float xx,float yy)
     {  
   x=xx;
   y=yy;
     }
-    void add(PVector v)
+    void add(myPVector v)
     {
   y+=v.y;
   x+=v.x;
     }
 
-    void sub(PVector v)
+    void sub(myPVector v)
     {
   y-=v.y;
   x-=v.x;
@@ -43,13 +43,13 @@ class PVector
 
 class Mover
 {
-    PVector location;
-    PVector velocity;
+    myPVector location;
+    myPVector velocity;
 
     Mover()
     {
-	location = new PVector(random(width),random(height));
-	velocity = new PVector(random(-2,2),random(-2,2));
+	location = new myPVector(random(width),random(height));
+	velocity = new myPVector(random(-2,2),random(-2,2));
     }
     
     void update()
