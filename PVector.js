@@ -1,98 +1,163 @@
-class myPVector
+static class myPVector
 {
-    float x,y;
+    float x, y, t_x, t_y;
+
     myPVector(float xx,float yy)
     {  
-  x=xx;
-  y=yy;
+	x = xx;
+	y = yy;
     }
+    
     void add(myPVector v)
     {
-  y+=v.y;
-  x+=v.x;
+	y+=v.y;
+	x+=v.x;
     }
 
     void sub(myPVector v)
     {
-  y-=v.y;
-  x-=v.x;
+	y-=v.y;
+	x-=v.x;
     }
     void mult(float n)
     {
-  x*=n;
-  y*=n;
+	x*=n;
+	y*=n;
     }
     void div(float n)
     {
-  x/=n;
-  y/=n;
+	x/=n;
+	y/=n;
     }
 
+    
     void normalize()
     {
-  float m=mag();
-  if(m!=0)
-      div(m);
+	float m=mag();
+	if(m!=0) div(m);
     }
     
     float mag()
     {
 	return sqrt(x*x+y*y);
     }
+    
+    void limit(float max)
+    {
+	if(mag() > max)
+	{
+	    normalize();
+	    mult(max);
+	}
+    }
+
+        // static
+    static myPVector add(myPVector v, myPVector v1)
+    {
+	myPVector v2 = new myPVector(v.x + v1.x, v.y + v1.y);
+	return v2;
+    }
+    
+    static myPVector sub(myPVector v, myPVector v1)
+    {
+	myPVector v2 = new myPVector(v.x - v1.x, v.y - v1.y);
+	return v2;
+    }
+    
+    static myPVector mult(myPVector v, float n)
+    {
+  myPVector v1 = new myPVector(v.x*=n, v.y*=n);
+  return v1;
+    }
+
+    static myPVector div(myPVector v, float n)
+    {
+  myPVector v1 =  new myPVector(v.x/=n, v.y/=n);
+  return v1;
+    }
+    //static
+
 }
 
 class Mover
 {
+
     myPVector location;
     myPVector velocity;
-
+    myPVector acceleration;
+    float topspeed;
+    int color_a, color_b, color_c, translate;    
     Mover()
     {
-	location = new myPVector(random(width),random(height));
-	velocity = new myPVector(random(-2,2),random(-2,2));
+	location = new myPVector(random(width), random(height));
+	acceleration = new myPVector(0, 0);
+	velocity = new myPVector(0,0);
+	topspeed = 4;
+	color_a = (int)random(0, 255);
+	color_b = (int)random(0, 255);
+	color_c = (int)random(0, 255);
+	translate = (int)random(0, 100);
     }
     
     void update()
     {
+	velocity.add(acceleration);
+	velocity.limit(topspeed);
 	location.add(velocity);
+	acceleration.mult(0);	
+    }
+    
+    void myApplyForce(myPVector force)
+    {
+	acceleration.add(force);
+    }
+    
+    void checkEdge()
+    {
+	if(location.x>width) acceleration.x=0;
+ 	else if(location.x<0) location.x=width;
+
+	if(location.y>height) location.y=0;
+	else if(location.y<0) location.y=height;
     }
     
     void display()
     {
-	stroke(0)
-	fill(175);
+	stroke(0);
+	fill(color_a, color_b, color_c, translate);
 	ellipse(location.x,location.y,16,16);
     }
 
-    void checkEdge()
-    {
-	if(location.x>width)
-	    location.x=0;
-	else if(location.x<0)
-	    location.x=width;
-	if(location.y>height)
-	    location.y=0;
-	else if(location.y<0)
-	    location.y=height;
-    }
 }
-
 
 Mover mover;
-
+myPVector wind;
+float t;
 void setup()
 {
-    size(800,200);
+    background(225);
+    size(200,200);
     smooth();
-    mover=new Mover;
+    mover = new Mover();
+    wind = new myPVector(0, 0.02);
+    t = 100;
 }
+
  
 
 void draw()
 {
-    background(255);
-
+    t += 0.01;
+    wind.normalize();
+    wind.mult(-1*map(noise(t), 0, 1, 0, 0.01));
+    mover.myApplyForce(wind);
+    if(mover.location.y < 0)
+    {
+	myPVector fo = new myPVector(-0.1, 0);
+	mover.myApplyForce(fo);
+    }
     mover.update();
-    mover.checkEdge();
+    //mover.checkEdge();
     mover.display();
 }
+ 
